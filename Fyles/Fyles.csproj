@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Arguments.cs" />
     <Compile Include="Extensions\String.cs" />
     <Compile Include="IconReader.cs" />
     <Compile Include="Program.cs" />
