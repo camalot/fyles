@@ -3,19 +3,27 @@ Fyles
 
 Generate file system (from windows) icon sprite sheet and css file
 
-<link href="https://raw.github.com/camalot/fyles/master/Sample/fyles.css" />
-<table>
-	<tr>
-		<th>Extension</th>
-		<th>16px</th>
-		<th>32px</th>
-		<th>48px</th>
-	</tr>
+----
+See [Fyles in action](http://camalot.github.io/fyles/).
 
-	<tr>
-		<td>3gp</td>		
-		<td><i class="fyles fyles-16 fyles-3gp-16"></i></td>
-		<td></td>
-		<td></td>
-	</tr>
-</table>
+----
+
+Using the CSS
+===
+
+     <i class="fyles fyles-mp3-48"></i>
+
+Usage
+===
+fyles.exe /max=48
+
+max:		The max size of icon to extract. 48 is the default
+
+----
+This will generate 2 files in the binary directory: fyles.css & fyles.png. Place fyles.png in a directory called "images" that 
+follows this type of structure.
+
+\- styles/  
+-- fyles.css  
+\- images/  
+-- fyles.png
