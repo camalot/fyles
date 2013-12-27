@@ -4,6 +4,7 @@
 #nuget
 packages/*
 !packages/repositories.config
+[pP]ublish.bat
 
 # User-specific files
 *.suo

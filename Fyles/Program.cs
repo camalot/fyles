@@ -123,9 +123,11 @@ namespace Fyles {
 							}
 
 							foreach ( var w in Widths ) {
-								var pos = defaultPositions[w];
-								line.AppendFormat ( ".{0}-{1}{{height: {1}px; width: {1}px; background-position: {2}{3} {4}{5};}}{6}", FYLES, w,
-									-pos.X, pos.X == 0 ? "" : "px", -pos.Y, pos.Y == 0 ? "" : "px", Environment.NewLine );
+								if ( defaultPositions.ContainsKey ( w ) ) {
+									var pos = defaultPositions[w];
+									line.AppendFormat ( ".{0}-{1}{{height: {1}px; width: {1}px; background-position: {2}{3} {4}{5};}}{6}", FYLES, w,
+										-pos.X, pos.X == 0 ? "" : "px", -pos.Y, pos.Y == 0 ? "" : "px", Environment.NewLine );
+								}
 							}
 
 							writer.WriteLine ( line );
@@ -152,38 +154,44 @@ namespace Fyles {
 
 		static void ProcessFileExtension ( String extension ) {
 			foreach ( var esize in Enum.GetValues ( typeof ( IconReader.IconSize ) ) ) {
-				var shfi = new Fyles.WinApi.Shell32.SHFILEINFO ( );
+				try {
+					var shfi = new Fyles.WinApi.Shell32.SHFILEINFO ( );
 
-				using ( var ico = IconReader.ExtractIconFromFileEx ( FYLES + extension, (IconReader.IconSize)esize, ref shfi ) ) {
-					if ( ico == null || ico.Width > MaxSize ) {
-						continue;
-					}
-
-					var size = String.Format ( "{0}", ico.Height, ico.Width );
-					if ( !Widths.Contains ( ico.Width ) ) {
-						Widths.Add ( ico.Width );
-					}
-					using ( var img = ico.ToBitmap ( ) ) {
-						var iconKey = extension.Substring ( 1 );
-						var iks = String.Format ( "{0}-{1}.png", iconKey, size );
-						if ( Hashes.ContainsKey ( iks ) ) {
+					using ( var ico = IconReader.ExtractIconFromFileEx ( FYLES + extension, (IconReader.IconSize)esize, ref shfi ) ) {
+						if ( ico == null || ico.Width > MaxSize ) {
 							continue;
 						}
-						var filename = Path.Combine ( OutputDirectory.FullName, iks.PathSafe ( ) );
-						Console.WriteLine ( "Saving: {0}", Path.GetFileNameWithoutExtension ( filename ) );
-						var hash = Hash ( img );
-						if ( Hashes.ContainsValue ( hash ) && iconKey != DEFAULT ) {
-							if ( Dupes.ContainsKey ( hash ) ) {
-								Dupes[hash].Add ( Path.GetFileNameWithoutExtension ( iks ) );
-							} else {
-								Dupes.Add ( hash, new List<string> { Path.GetFileNameWithoutExtension ( iks ) } );
+
+						var size = String.Format ( "{0}", ico.Height, ico.Width );
+						using ( var img = ico.ToBitmap ( ) ) {
+							var iconKey = extension.Substring ( 1 );
+							var iks = String.Format ( "{0}-{1}.png", iconKey, size );
+							if ( Hashes.ContainsKey ( iks ) ) {
+								continue;
 							}
+							var filename = Path.Combine ( OutputDirectory.FullName, iks.PathSafe ( ) );
+							Console.WriteLine ( "Saving: {0}", Path.GetFileNameWithoutExtension ( filename ) );
+							var hash = Hash ( img );
+							if ( Hashes.ContainsValue ( hash ) && iconKey != DEFAULT ) {
+								if ( Dupes.ContainsKey ( hash ) ) {
+									Dupes[hash].Add ( Path.GetFileNameWithoutExtension ( iks ) );
+								} else {
+									Dupes.Add ( hash, new List<string> { Path.GetFileNameWithoutExtension ( iks ) } );
+								}
+							}
+
+							if ( !Widths.Contains ( ico.Width ) ) {
+								Widths.Add ( ico.Width );
+							}
+
+							Hashes.Add ( iks, hash );
+
+							img.Save ( filename, ImageFormat.Png );
 						}
-
-						Hashes.Add ( iks, hash );
-
-						img.Save ( filename, ImageFormat.Png );
 					}
+
+				} catch ( Exception ex ) {
+					Console.Error.WriteLine ( ex.Message );
 				}
 			}
 		}
